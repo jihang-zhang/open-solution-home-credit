@@ -278,9 +278,9 @@ class ApplicationFeatures(BaseTransformer):
                                              ]
 
     def transform(self, X, **kwargs):
-        docs = [_f for _f in df.columns if 'FLAG_DOC' in _f]
-        live = [_f for _f in df.columns if ('FLAG_' in _f) & ('FLAG_DOC' not in _f) & ('_FLAG_' not in _f)]
-        inc_by_org = df[['AMT_INCOME_TOTAL', 'ORGANIZATION_TYPE']].groupby('ORGANIZATION_TYPE').median()['AMT_INCOME_TOTAL']
+        docs = [_f for _f in X.columns if 'FLAG_DOC' in _f]
+        live = [_f for _f in X.columns if ('FLAG_' in _f) & ('FLAG_DOC' not in _f) & ('_FLAG_' not in _f)]
+        inc_by_org = X[['AMT_INCOME_TOTAL', 'ORGANIZATION_TYPE']].groupby('ORGANIZATION_TYPE').median()['AMT_INCOME_TOTAL']
         X['doc_ind_kurt'] = X[docs].kurtosis(axis=1)
         X['live_ind_sum'] = X[live].sum(axis=1)
         X['inc_by_org'] = X['ORGANIZATION_TYPE'].map(inc_by_org)
