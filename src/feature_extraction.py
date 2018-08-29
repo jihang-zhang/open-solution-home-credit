@@ -233,7 +233,13 @@ class ApplicationFeatures(BaseTransformer):
     def __init__(self, categorical_columns, numerical_columns):
         self.categorical_columns = categorical_columns
         self.numerical_columns = numerical_columns
-        self.engineered_numerical_columns = ['annuity_income_percentage',
+        self.engineered_numerical_columns = ['doc_ind_kurt',
+                                             'live_ind_sum',
+                                             'inc_by_org',
+                                             'external_source_1_squared',
+                                             'external_source_2_squared',
+                                             'external_source_3_squared',
+                                             'annuity_income_percentage',
                                              'car_to_birth_ratio',
                                              'car_to_employ_ratio',
                                              'children_ratio',
@@ -252,7 +258,15 @@ class ApplicationFeatures(BaseTransformer):
                                              'external_sources_max',
                                              'external_sources_sum',
                                              'external_sources_mean',
+                                             'external_sources_std',
                                              'external_sources_nanmedian',
+                                             'external_sources_squared_weighted',
+                                             'external_sources_squared_min',
+                                             'external_sources_squared_max',
+                                             'external_sources_squared_sum',
+                                             'external_sources_squared_mean',
+                                             'external_sources_squared_std',
+                                             'external_sources_squared_nanmedian',
                                              'short_employment',
                                              'young_age',
                                              'cnt_non_child',
@@ -300,7 +314,7 @@ class ApplicationFeatures(BaseTransformer):
             X['external_sources_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
                 X[['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']], axis=1)
         for function_name in ['min', 'max', 'sum', 'mean', 'std', 'nanmedian']:
-            X['external_sources_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
+            X['external_sources_squared_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
                 X[['external_source_1_squared', 'external_source_2_squared', 'external_source_3_squared']], axis=1)
 
         X['short_employment'] = (X['DAYS_EMPLOYED'] < -2000).astype(int)
