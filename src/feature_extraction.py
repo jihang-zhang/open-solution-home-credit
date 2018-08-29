@@ -267,6 +267,16 @@ class ApplicationFeatures(BaseTransformer):
                                              'external_sources_squared_mean',
                                              'external_sources_squared_std',
                                              'external_sources_squared_nanmedian',
+                                             'external_source_interact_12',
+                                             'external_source_interact_13',
+                                             'external_source_interact_23',
+                                             'external_source_interact_123',
+                                             'external_sources_order2_min',
+                                             'external_sources_order2_max',
+                                             'external_sources_order2_sum',
+                                             'external_sources_order2_mean',
+                                             'external_sources_order2_std',
+                                             'external_sources_order2_nanmedian',
                                              'short_employment',
                                              'young_age',
                                              'cnt_non_child',
@@ -287,6 +297,10 @@ class ApplicationFeatures(BaseTransformer):
         X['external_source_1_squared'] = X['EXT_SOURCE_1'] ** 2
         X['external_source_2_squared'] = X['EXT_SOURCE_2'] ** 2
         X['external_source_3_squared'] = X['EXT_SOURCE_3'] ** 2
+        X['external_source_interact_12'] = X['EXT_SOURCE_1'] * X['EXT_SOURCE_2']
+        X['external_source_interact_13'] = X['EXT_SOURCE_1'] * X['EXT_SOURCE_3']
+        X['external_source_interact_23'] = X['EXT_SOURCE_2'] * X['EXT_SOURCE_3']
+        X['external_source_interact_123'] = X['EXT_SOURCE_1'] * X['EXT_SOURCE_2'] * X['EXT_SOURCE_3']
         
         X['annuity_income_percentage'] = X['AMT_ANNUITY'] / X['AMT_INCOME_TOTAL']
         X['car_to_birth_ratio'] = X['OWN_CAR_AGE'] / X['DAYS_BIRTH']
@@ -316,6 +330,11 @@ class ApplicationFeatures(BaseTransformer):
         for function_name in ['min', 'max', 'sum', 'mean', 'std', 'nanmedian']:
             X['external_sources_squared_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
                 X[['external_source_1_squared', 'external_source_2_squared', 'external_source_3_squared']], axis=1)
+        for function_name in ['min', 'max', 'sum', 'mean', 'std', 'nanmedian']:
+            X['external_sources_order2_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
+                X[['external_source_1_squared', 'external_source_2_squared', 'external_source_3_squared',
+                  'external_source_interact_12', 'external_source_interact_13', 'external_source_interact_23',
+                  'external_source_interact_123']], axis=1)
 
         X['short_employment'] = (X['DAYS_EMPLOYED'] < -2000).astype(int)
         X['young_age'] = (X['DAYS_BIRTH'] < -14000).astype(int)
