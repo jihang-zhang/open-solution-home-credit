@@ -264,6 +264,16 @@ class ApplicationFeatures(BaseTransformer):
                                              ]
 
     def transform(self, X, **kwargs):
+        docs = [_f for _f in df.columns if 'FLAG_DOC' in _f]
+        live = [_f for _f in df.columns if ('FLAG_' in _f) & ('FLAG_DOC' not in _f) & ('_FLAG_' not in _f)]
+        inc_by_org = df[['AMT_INCOME_TOTAL', 'ORGANIZATION_TYPE']].groupby('ORGANIZATION_TYPE').median()['AMT_INCOME_TOTAL']
+        X['doc_ind_kurt'] = X[docs].kurtosis(axis=1)
+        X['live_ind_sum'] = X[live].sum(axis=1)
+        X['inc_by_org'] = X['ORGANIZATION_TYPE'].map(inc_by_org)
+        X['external_source_1_squared'] = X['EXT_SOURCE_1'] ** 2
+        X['external_source_2_squared'] = X['EXT_SOURCE_2'] ** 2
+        X['external_source_3_squared'] = X['EXT_SOURCE_3'] ** 2
+        
         X['annuity_income_percentage'] = X['AMT_ANNUITY'] / X['AMT_INCOME_TOTAL']
         X['car_to_birth_ratio'] = X['OWN_CAR_AGE'] / X['DAYS_BIRTH']
         X['car_to_employ_ratio'] = X['OWN_CAR_AGE'] / X['DAYS_EMPLOYED']
@@ -279,15 +289,19 @@ class ApplicationFeatures(BaseTransformer):
         X['phone_to_birth_ratio'] = X['DAYS_LAST_PHONE_CHANGE'] / X['DAYS_BIRTH']
         X['phone_to_employ_ratio'] = X['DAYS_LAST_PHONE_CHANGE'] / X['DAYS_EMPLOYED']
         X['external_sources_weighted'] = X.EXT_SOURCE_1 * 2 + X.EXT_SOURCE_2 * 3 + X.EXT_SOURCE_3 * 4
+        X['external_sources_squared_weighted'] = X['external_source_1_squared'] * 2 + X['external_source_1_squared'] * 3 + X['external_source_1_squared'] * 4
         X['cnt_non_child'] = X['CNT_FAM_MEMBERS'] - X['CNT_CHILDREN']
         X['child_to_non_child_ratio'] = X['CNT_CHILDREN'] / X['cnt_non_child']
         X['income_per_non_child'] = X['AMT_INCOME_TOTAL'] / X['cnt_non_child']
         X['credit_per_person'] = X['AMT_CREDIT'] / X['CNT_FAM_MEMBERS']
         X['credit_per_child'] = X['AMT_CREDIT'] / (1 + X['CNT_CHILDREN'])
         X['credit_per_non_child'] = X['AMT_CREDIT'] / X['cnt_non_child']
-        for function_name in ['min', 'max', 'sum', 'mean', 'nanmedian']:
+        for function_name in ['min', 'max', 'sum', 'mean', 'std', 'nanmedian']:
             X['external_sources_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
                 X[['EXT_SOURCE_1', 'EXT_SOURCE_2', 'EXT_SOURCE_3']], axis=1)
+        for function_name in ['min', 'max', 'sum', 'mean', 'std', 'nanmedian']:
+            X['external_sources_{}'.format(function_name)] = eval('np.{}'.format(function_name))(
+                X[['external_source_1_squared', 'external_source_2_squared', 'external_source_3_squared']], axis=1)
 
         X['short_employment'] = (X['DAYS_EMPLOYED'] < -2000).astype(int)
         X['young_age'] = (X['DAYS_BIRTH'] < -14000).astype(int)
